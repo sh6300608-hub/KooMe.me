@@ -1,25 +1,20 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
-const credentialsSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8).max(128),
-});
-
+const credentialsSchema = z.object({ email: z.string().email(), password: z.string().min(8).max(128) });
 const configuredOwnerEmail = process.env.OWNER_EMAIL?.toLowerCase();
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  adapter: PrismaAdapter(db),
   trustHost: true,
   session: { strategy: "database" },
   providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID ?? "",
-      clientSecret: process.env.AUTH_GOOGLE_SECRET ?? "",
-    }),
+    Google({ clientId: process.env.AUTH_GOOGLE_ID ?? "", clientSecret: process.env.AUTH_GOOGLE_SECRET ?? "" }),
     Credentials({
       name: "Email and password",
       credentials: { email: {}, password: {} },
@@ -29,10 +24,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const email = parsed.data.email.toLowerCase();
         if (configuredOwnerEmail && email !== configuredOwnerEmail) return null;
         const user = await db.user.findUnique({ where: { email } });
-        if (!user?.passwordHash) return null;
-        const valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
-        if (!valid || user.role !== "OWNER") return null;
-        return { id: user.id, name: user.name, email: user.email, image: user.image, role: user.role };
+        if (!user?.passwordHash || user.role !== "OWNER") return null;
+        if (!(await bcrypt.compare(parsed.data.password, user.passwordHash))) return null;
+        return { id: user.id, name: user.name, email: user.email, image: user.image };
       },
     }),
   ],

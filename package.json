@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node scripts/prepare-prisma.cjs && prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
+    "db:generate": "node scripts/prepare-prisma.cjs && prisma generate",
+    "db:migrate": "node scripts/prepare-prisma.cjs && prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {

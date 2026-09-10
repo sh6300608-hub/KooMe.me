@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: koomi
+          POSTGRES_PASSWORD: koomi
+          POSTGRES_DB: koomi
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U koomi -d koomi"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://koomi:koomi@localhost:5432/koomi
+      AUTH_SECRET: ci-only-secret-change-me
+      AUTH_TRUST_HOST: "true"
+      OWNER_EMAIL: owner@example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npx prisma generate
+      - run: npx prisma db push
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

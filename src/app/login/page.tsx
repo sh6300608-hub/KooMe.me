@@ -1,18 +1,4 @@
-import { signIn } from "@/lib/auth";
-
-export default function LoginPage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-slate-100">
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl">
-        <p className="text-sm text-blue-400">KooMi</p>
-        <h1 className="mt-2 text-2xl font-semibold">Private workspace</h1>
-        <p className="mt-2 text-sm text-slate-400">Owner access only.</p>
-        <form action={async (formData) => { "use server"; await signIn("credentials", { email: formData.get("email"), password: formData.get("password"), redirectTo: "/dashboard" }); }} className="mt-7 space-y-4">
-          <label className="block text-sm">Email<input name="email" type="email" autoComplete="email" required className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 outline-none focus:border-blue-500" /></label>
-          <label className="block text-sm">Password<input name="password" type="password" autoComplete="current-password" required minLength={8} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 outline-none focus:border-blue-500" /></label>
-          <button type="submit" className="w-full rounded-lg bg-blue-500 px-4 py-2.5 font-medium hover:bg-blue-400">Sign in</button>
-        </form>
-      </div>
-    </main>
-  );
-}
+"use client";
+import { FormEvent, useState } from "react";
+import { signIn } from "next-auth/react";
+export default function LoginPage(){const [error,setError]=useState("");const [busy,setBusy]=useState(false);async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setError("");const f=new FormData(e.currentTarget);const r=await signIn("credentials",{email:String(f.get("email")),password:String(f.get("password")),redirect:false,callbackUrl:"/dashboard"});if(r?.error){setError("Invalid owner credentials.");setBusy(false);return}window.location.assign(r?.url??"/dashboard")}return <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white"><div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl"><p className="text-sm text-blue-400">KooMi.me</p><h1 className="mt-2 text-3xl font-semibold">Owner sign in</h1><p className="mt-2 text-sm text-slate-400">Private portfolio workspace.</p><form onSubmit={submit} className="mt-8 space-y-4"><label className="block text-sm">Email<input required name="email" type="email" autoComplete="email" className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"/></label><label className="block text-sm">Password<input required name="password" type="password" autoComplete="current-password" className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"/></label>{error&&<p role="alert" className="text-sm text-red-400">{error}</p>}<button disabled={busy} className="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium hover:bg-blue-400 disabled:opacity-50">{busy?"Signing in…":"Sign in"}</button></form><div className="my-5 flex items-center gap-3 text-xs text-slate-600"><span className="h-px flex-1 bg-slate-800"/>OR<span className="h-px flex-1 bg-slate-800"/></div><button type="button" onClick={()=>signIn("google",{callbackUrl:"/dashboard"})} className="w-full rounded-xl border border-slate-700 px-4 py-3 text-sm hover:bg-slate-800">Continue with Google</button></div></main>}

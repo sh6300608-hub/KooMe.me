@@ -1,8 +1,3 @@
-import { db } from "@/lib/db";
-
-export const dynamic = "force-dynamic";
-
-export default async function SkillsPage() {
-  const skills = await db.skill.findMany({ where: { published: true }, include: { category: true }, orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { name: "asc" }] });
-  return <main className="container" style={{ padding: "90px 0" }}><p className="muted">SKILLS</p><h1>Skills</h1><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16, marginTop: 30 }}>{skills.map((skill) => <article className="surface" key={skill.id} style={{ padding: 22 }}><h2 style={{ marginTop: 0 }}>{skill.name}</h2><p className="muted">{skill.category?.name ?? "Skill"} · {skill.proficiency}%</p></article>)}</div>{skills.length === 0 && <p className="muted">No published skills yet.</p>}</main>;
-}
+import { db } from "@/lib/db";import { SiteNav } from "@/components/site-nav";import { SiteFooter } from "@/components/site-footer";
+export const dynamic="force-dynamic";
+export default async function SkillsPage(){const skills=await db.skill.findMany({where:{published:true},include:{category:true},orderBy:[{featured:"desc"},{sortOrder:"asc"},{name:"asc"}]});return <><SiteNav/><main className="container page"><p className="eyebrow">SKILLS / 02</p><h1 className="page-title">Core toolkit.</h1><p className="page-lede">Technical skills and working strengths, shown with the proficiency levels maintained in the private workspace.</p><div className="grid grid-2" style={{marginTop:50}}>{skills.map(s=><article className="surface card" key={s.id}><div style={{display:"flex",justifyContent:"space-between",gap:20}}><div><p className="muted" style={{marginTop:0}}>{s.category?.name??"Skill"}</p><h2>{s.name}</h2></div><strong>{s.proficiency}%</strong></div><div className="progress" style={{marginTop:18}}><span style={{width:`${Math.min(100,Math.max(0,s.proficiency))}%`}}/></div></article>)}{!skills.length&&<p className="muted">No published skills yet.</p>}</div></main><SiteFooter/></>}

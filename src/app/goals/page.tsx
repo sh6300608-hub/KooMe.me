@@ -1,41 +1,25 @@
 import { db } from "@/lib/db";
+import { SiteNav } from "@/components/site-nav";
+import { SiteFooter } from "@/components/site-footer";
 
 export const dynamic = "force-dynamic";
 
-const labels: Record<string, string> = {
-  CAREER: "Career Goals",
-  SKILL: "Skills to Learn",
-  PROJECT: "Future Projects",
-  AMBITION: "Long-Term Ambitions",
-};
+const labels: Record<string, string> = { CAREER: "Career Goals", SKILL: "Skills to Learn", PROJECT: "Future Projects", AMBITION: "Long-Term Ambitions" };
 
 export default async function GoalsPage() {
-  const items = await db.futureGoal.findMany({
-    where: { visibility: "PUBLIC" },
-    orderBy: [{ category: "asc" }, { targetDate: "asc" }],
-  });
-
+  const items = await db.futureGoal.findMany({ where: { visibility: "PUBLIC" }, orderBy: [{ category: "asc" }, { targetDate: "asc" }] });
   return (
-    <main className="container" style={{ padding: "90px 0" }}>
-      <p className="muted">DIRECTION</p>
-      <h1>Future goals</h1>
-      <p className="muted" style={{ maxWidth: 720 }}>
-        A public view of goals that have deliberately been marked public. Private planning stays private, because apparently not every thought needs a landing page.
-      </p>
-      <div style={{ display: "grid", gap: 16, marginTop: 30 }}>
-        {items.map((item) => (
-          <article className="surface" key={item.id} style={{ padding: 24 }}>
-            <p className="muted" style={{ margin: 0 }}>{labels[item.category] ?? item.category}</p>
-            <h2 style={{ margin: "8px 0 16px" }}>{item.title}</h2>
-            <div style={{ height: 8, borderRadius: 999, background: "rgba(148,163,184,.18)", overflow: "hidden" }}>
-              <div style={{ width: `${Math.min(100, Math.max(0, item.progress))}%`, height: "100%", background: "var(--accent, #6d8cff)" }} />
-            </div>
-            <p className="muted" style={{ marginBottom: 0 }}>{item.progress}% complete{item.targetDate ? ` · target ${item.targetDate.toLocaleDateString()}` : ""}</p>
-            {item.notes && <p>{item.notes}</p>}
-          </article>
-        ))}
+    <><SiteNav /><main className="container page-shell">
+      <section className="page-hero"><p className="eyebrow">DIRECTION</p><h1>Future goals</h1><p className="lead">A focused view of the goals that are intentionally public. Private planning stays private.</p></section>
+      <div className="goal-list">
+        {items.map((item) => <article className="surface goal-card" key={item.id}>
+          <div className="goal-meta"><span className="tag">{labels[item.category] ?? item.category}</span>{item.targetDate && <span className="muted">Target {item.targetDate.toLocaleDateString()}</span>}</div>
+          <h2>{item.title}</h2>
+          <div className="progress" aria-label={`${item.progress}% complete`}><span style={{ width: `${Math.min(100, Math.max(0, item.progress))}%` }} /></div>
+          <div className="goal-footer"><span>{item.progress}% complete</span>{item.notes && <span className="muted">{item.notes}</span>}</div>
+        </article>)}
       </div>
-      {items.length === 0 && <p className="muted">No public goals yet.</p>}
-    </main>
+      {!items.length && <div className="surface empty-state"><h2>No public goals yet</h2><p className="muted">Goals will appear here after they are intentionally published.</p></div>}
+    </main><SiteFooter /></>
   );
 }

@@ -1,8 +1,6 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
-
+import { SiteNav } from "@/components/site-nav";
+import { SiteFooter } from "@/components/site-footer";
 export const dynamic = "force-dynamic";
-
-export default async function AboutPage() {
-  const profile = await db.profile.findFirst({ where: { published: true }, include: { photos: { where: { published: true }, orderBy: { sortOrder: "asc" } } } });
-  return <main className="container" style={{ padding: "90px 0" }}><p className="muted">ABOUT</p><h1>{profile?.headline ?? "About"}</h1><p className="muted" style={{ maxWidth: 760, fontSize: 19, lineHeight: 1.8 }}>{profile?.bio ?? "Published profile information will appear here."}</p>{profile?.photos.length ? <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16, marginTop: 40 }}>{profile.photos.map((photo) => <img key={photo.id} src={photo.url} alt={photo.alt ?? "Profile photo"} style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: 16 }} />)}</div> : null}</main>;
-}
+export default async function AboutPage(){const p=await db.profile.findFirst({where:{published:true},include:{photos:{where:{published:true},orderBy:{sortOrder:"asc"}}}});return <><SiteNav/><main className="container page"><p className="eyebrow">ABOUT / 01</p><h1 className="page-title">A software journey built on fundamentals.</h1><p className="page-lede">{p?.bio??"Published profile information will appear here."}</p><div className="grid grid-2" style={{marginTop:50}}><article className="surface card"><p className="eyebrow">How I work</p><p>{p?.workStyle??"Curious, practical and focused on learning through real projects."}</p></article><article className="surface card"><p className="eyebrow">Interests</p><p>{p?.interests??"Problem solving and learning new technologies."}</p></article><article className="surface card"><p className="eyebrow">Strengths</p><p>{p?.strengths??"Problem solving, technical learning and collaboration."}</p></article><article className="surface card"><p className="eyebrow">Direction</p><p>{p?.goals??"Growing toward meaningful software engineering opportunities."}</p></article></div>{p?.photos.length?<div className="grid grid-3" style={{marginTop:24}}>{p.photos.map(x=><img key={x.id} src={x.url} alt={x.alt??"Profile photo"} style={{width:"100%",aspectRatio:"1",objectFit:"cover",borderRadius:20}}/>)}</div>:null}<div style={{marginTop:40}}><Link className="btn btn-primary" href="/resume/software-developer">View resume ↗</Link></div></main><SiteFooter/></>}

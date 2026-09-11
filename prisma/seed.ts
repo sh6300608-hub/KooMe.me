@@ -33,39 +33,30 @@ async function main() {
     },
   });
 
-  const categories = [
-    ["Programming", 1],
-    ["Computer Science", 2],
-    ["Web", 3],
-    ["Professional", 4],
-  ] as const;
+  const categories = [["Programming", 1], ["Computer Science", 2], ["Web", 3], ["Professional", 4]] as const;
   const categoryIds = new Map<string, string>();
   for (const [name, sortOrder] of categories) {
-    const category = await db.skillCategory.upsert({ where: { name }, update: { sortOrder }, create: { name, sortOrder } });
+    const existing = await db.skillCategory.findFirst({ where: { name } });
+    const category = existing
+      ? await db.skillCategory.update({ where: { id: existing.id }, data: { sortOrder } })
+      : await db.skillCategory.create({ data: { name, sortOrder } });
     categoryIds.set(name, category.id);
   }
 
   const skills = [
-    ["Java", "Programming", 70, true, 1],
-    ["Python", "Programming", 70, true, 2],
-    ["JavaScript", "Web", 60, true, 3],
-    ["HTML", "Web", 70, false, 4],
-    ["CSS", "Web", 65, false, 5],
+    ["Java", "Programming", 70, true, 1], ["Python", "Programming", 70, true, 2],
+    ["JavaScript", "Web", 60, true, 3], ["HTML", "Web", 70, false, 4], ["CSS", "Web", 65, false, 5],
     ["Data Structures & Algorithms", "Computer Science", 65, true, 6],
     ["Object-Oriented Programming", "Computer Science", 70, true, 7],
-    ["Algorithm Design", "Computer Science", 60, false, 8],
-    ["Version Control", "Professional", 55, false, 9],
+    ["Algorithm Design", "Computer Science", 60, false, 8], ["Version Control", "Professional", 55, false, 9],
     ["Team Collaboration", "Professional", 55, false, 10],
   ] as const;
   for (const [name, category, proficiency, featured, sortOrder] of skills) {
     const categoryId = categoryIds.get(category);
     if (!categoryId) throw new Error(`Missing skill category: ${category}`);
     const existing = await db.skill.findFirst({ where: { userId: user.id, name } });
-    if (existing) {
-      await db.skill.update({ where: { id: existing.id }, data: { categoryId, proficiency, featured, sortOrder, published: false } });
-    } else {
-      await db.skill.create({ data: { userId: user.id, name, categoryId, proficiency, featured, sortOrder, published: false } });
-    }
+    if (existing) await db.skill.update({ where: { id: existing.id }, data: { categoryId, proficiency, featured, sortOrder, published: false } });
+    else await db.skill.create({ data: { userId: user.id, name, categoryId, proficiency, featured, sortOrder, published: false } });
   }
 
   const certificates = [
@@ -79,11 +70,8 @@ async function main() {
   ];
   for (const certificate of certificates) {
     const existing = await db.certificate.findFirst({ where: { userId: user.id, title: certificate.title, organization: certificate.organization } });
-    if (existing) {
-      await db.certificate.update({ where: { id: existing.id }, data: { ...certificate, status: PublishStatus.DRAFT, featured: false } });
-    } else {
-      await db.certificate.create({ data: { userId: user.id, ...certificate, status: PublishStatus.DRAFT, featured: false } });
-    }
+    if (existing) await db.certificate.update({ where: { id: existing.id }, data: { ...certificate, status: PublishStatus.DRAFT, featured: false } });
+    else await db.certificate.create({ data: { userId: user.id, ...certificate, status: PublishStatus.DRAFT, featured: false } });
   }
 
   const education = {
@@ -96,11 +84,8 @@ async function main() {
     description: "Current B.Tech student in Computer Science and Engineering.",
   };
   const existingEducation = await db.education.findFirst({ where: { userId: user.id, degree: education.degree, institution: education.institution } });
-  if (existingEducation) {
-    await db.education.update({ where: { id: existingEducation.id }, data: { ...education, status: PublishStatus.DRAFT, featured: true } });
-  } else {
-    await db.education.create({ data: { userId: user.id, ...education, status: PublishStatus.DRAFT, featured: true } });
-  }
+  if (existingEducation) await db.education.update({ where: { id: existingEducation.id }, data: { ...education, status: PublishStatus.DRAFT, featured: true } });
+  else await db.education.create({ data: { userId: user.id, ...education, status: PublishStatus.DRAFT, featured: true } });
 
   console.log("Seeded source-backed portfolio data as DRAFT for", user.email);
 }

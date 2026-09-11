@@ -1,10 +1,10 @@
-import dynamic from "next/dynamic";
+import dynamicLoader from "next/dynamic";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 
-const Hero3D = dynamic(() => import("@/components/hero-3d"), { ssr: false });
+const Hero3D = dynamicLoader(() => import("@/components/hero-3d"), { ssr: false });
 
 export const dynamic = "force-dynamic";
 

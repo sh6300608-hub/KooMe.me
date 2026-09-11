@@ -13,7 +13,8 @@ Next.js, React, TypeScript, Tailwind CSS, Prisma, PostgreSQL, Auth.js, React Thr
 3. Install dependencies with `npm install`.
 4. Generate Prisma Client with `npm run db:generate`.
 5. Apply the schema with `npx prisma db push` for local development.
-6. Start with `npm run dev`.
+6. Run `npm run db:seed` to load the supplied source-backed profile, education, skills and certificate records as **DRAFT** content.
+7. Start with `npm run dev`.
 
 ## Production notes
 
@@ -24,4 +25,6 @@ Next.js, React, TypeScript, Tailwind CSS, Prisma, PostgreSQL, Auth.js, React Thr
 - Run CI before deployment.
 - Only content explicitly marked published is exposed by public routes.
 
-Personal credentials, achievements, education, employers and other biographical facts are intentionally not fabricated in seed data.
+## Source-backed content
+
+The seed data is limited to information supplied in the owner's resume, academic grade card, certificates and internship documents. It deliberately keeps imported records in draft state so nothing is publicly published without owner approval. Uploaded binary assets still need to be placed in the application's configured private/public storage before their `assetUrl`, `documentUrl` or `pdfUrl` fields are populated.

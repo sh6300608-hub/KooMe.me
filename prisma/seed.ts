@@ -1,9 +1,7 @@
 import { PrismaClient, PublishStatus } from "@prisma/client";
 
 const db = new PrismaClient();
-const ownerEmail = process.env.OWNER_EMAIL;
-
-if (!ownerEmail) throw new Error("OWNER_EMAIL is required to seed the portfolio owner");
+const ownerEmail = process.env.OWNER_EMAIL ?? "owner@example.com";
 
 async function main() {
   const user = await db.user.upsert({

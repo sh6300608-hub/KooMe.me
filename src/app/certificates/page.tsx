@@ -1,8 +1,3 @@
-import { db } from "@/lib/db";
-
-export const dynamic = "force-dynamic";
-
-export default async function CertificatesPage() {
-  const items = await db.certificate.findMany({ where: { status: "PUBLISHED" }, orderBy: [{ featured: "desc" }, { date: "desc" }] });
-  return <main className="container" style={{ padding: "90px 0" }}><p className="muted">CREDENTIALS</p><h1>Certificates & achievements</h1><div style={{ display: "grid", gap: 16, marginTop: 30 }}>{items.map((item) => <article className="surface" key={item.id} style={{ padding: 24 }}><h2 style={{ marginTop: 0 }}>{item.title}</h2><p className="muted">{item.organization}{item.date ? ` · ${new Date(item.date).toLocaleDateString()}` : ""}</p>{item.verificationUrl && <a href={item.verificationUrl} target="_blank" rel="noreferrer">Verify credential ↗</a>}</article>)}</div>{items.length === 0 && <p className="muted">No published credentials yet.</p>}</main>;
-}
+import { db } from "@/lib/db";import { SiteNav } from "@/components/site-nav";import { SiteFooter } from "@/components/site-footer";
+export const dynamic="force-dynamic";
+export default async function CertificatesPage(){const items=await db.certificate.findMany({where:{status:"PUBLISHED"},orderBy:[{featured:"desc"},{date:"desc"}]});return <><SiteNav/><main className="container page"><p className="eyebrow">CREDENTIALS / 03</p><h1 className="page-title">Proof of learning.</h1><p className="page-lede">Certificates and credentials that have been deliberately approved for the public portfolio.</p><div className="grid grid-2" style={{marginTop:50}}>{items.map(x=><article className="surface card" key={x.id}><p className="eyebrow">{x.organization}</p><h2 style={{fontSize:24}}>{x.title}</h2><p className="muted">{x.date?new Date(x.date).toLocaleDateString():"Date not provided"}{x.credentialId?` · ${x.credentialId}`:""}</p>{x.skills&&<div style={{display:"flex",gap:7,flexWrap:"wrap"}}>{x.skills.split(",").map(s=><span className="tag" key={s}>{s.trim()}</span>)}</div>}{x.verificationUrl&&<a className="btn btn-secondary" style={{marginTop:18}} href={x.verificationUrl} target="_blank" rel="noreferrer">Verify credential ↗</a>}</article>)}{!items.length&&<p className="muted">No published credentials yet.</p>}</div></main><SiteFooter/></>}

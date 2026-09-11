@@ -1,10 +1,8 @@
-import dynamicLoader from "next/dynamic";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
-
-const Hero3D = dynamicLoader(() => import("@/components/hero-3d"), { ssr: false });
+import { Hero3DLoader } from "@/components/hero-3d-loader";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +24,7 @@ export default async function Home() {
         <div className="hero-actions"><Link className="btn btn-primary" href="/work">Explore my work ↗</Link><Link className="btn btn-secondary" href="/resume/software-developer">View resume</Link></div>
         <div className="hero-tags">{["Java", "Python", "SQL", "Data Structures & Algorithms"].map(x => <span className="tag" key={x}>{x}</span>)}</div>
       </div>
-      <div className="hero-visual"><Hero3D /><span className="hero-note">Interactive 3D · cursor responsive · performance aware</span></div>
+      <div className="hero-visual"><Hero3DLoader /><span className="hero-note">Interactive 3D · cursor responsive · performance aware</span></div>
     </section>
     <section className="container section"><div className="section-head"><div><p className="eyebrow">01 / About</p><h2>Learning by building.</h2></div><Link className="btn btn-secondary" href="/about">Read more ↗</Link></div><div className="surface card"><p className="page-lede no-margin">{profile?.workStyle ?? "A focused software-development journey grounded in computer science fundamentals, problem solving and learning new technologies."}</p></div></section>
     <section className="container section"><div className="section-head"><div><p className="eyebrow">02 / Selected work</p><h2>Projects with a purpose.</h2></div><Link className="btn btn-secondary" href="/work">All projects ↗</Link></div><div className="grid grid-2">{projects.map(p=><Link href={`/work/${p.slug}`} key={p.id} className="surface card card-link"><p className="eyebrow">{p.featured ? "Featured project" : "Project"}</p><h3>{p.name}</h3><p className="muted">{p.description}</p><div className="tag-row">{p.skills.slice(0,4).map(s=><span className="tag" key={s.skillId}>{s.skill.name}</span>)}</div></Link>)}{!projects.length&&<div className="surface card"><h3>No published projects yet.</h3><p className="muted">Projects added in the workspace will appear here after publishing.</p></div>}</div></section>

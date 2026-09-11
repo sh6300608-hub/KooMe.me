@@ -1,2 +1,20 @@
-import Link from "next/link";import { db } from "@/lib/db";
-export default async function WorkPage(){const projects=await db.project.findMany({where:{status:"PUBLISHED"},include:{media:true,skills:{include:{skill:true}}},orderBy:[{featured:"desc"},{updatedAt:"desc"}]});return <main className="min-h-screen bg-slate-950 px-5 py-16 text-slate-100"><div className="mx-auto max-w-6xl"><Link href="/" className="text-sm text-blue-400">← KooMi</Link><header className="mt-10"><p className="text-sm text-blue-400">SELECTED WORK</p><h1 className="mt-2 text-5xl font-semibold">Projects</h1><p className="mt-4 max-w-2xl text-slate-400">Only explicitly published projects appear here. Drafts stay private.</p></header><div className="mt-12 grid gap-5 md:grid-cols-2">{projects.map(p=><Link key={p.id} href={`/work/${p.slug}`} className="group rounded-2xl border border-slate-800 bg-slate-900/50 p-7 transition hover:-translate-y-1 hover:border-blue-500/50"><div className="flex items-start justify-between gap-4"><h2 className="text-2xl font-medium group-hover:text-blue-400">{p.name}</h2>{p.featured&&<span className="text-xs text-blue-400">FEATURED</span>}</div><p className="mt-3 text-slate-400">{p.description}</p><div className="mt-6 flex flex-wrap gap-2">{p.skills.map(s=><span key={s.skillId} className="rounded-full border border-slate-700 px-2.5 py-1 text-xs text-slate-500">{s.skill.name}</span>)}</div></Link>)}{!projects.length&&<div className="col-span-full rounded-2xl border border-dashed border-slate-700 p-12 text-center text-slate-500">No published projects yet.</div>}</div></div></main>}
+import Link from "next/link";
+import { db } from "@/lib/db";
+import { SiteNav } from "@/components/site-nav";
+import { SiteFooter } from "@/components/site-footer";
+
+export const dynamic = "force-dynamic";
+
+export default async function WorkPage() {
+  const projects = await db.project.findMany({ where: { status: "PUBLISHED" }, include: { media: true, skills: { include: { skill: true } } }, orderBy: [{ featured: "desc" }, { updatedAt: "desc" }] });
+  return <><SiteNav /><main className="container page-shell">
+    <section className="page-hero"><p className="eyebrow">SELECTED WORK</p><h1>Projects</h1><p className="lead">A curated set of shipped work, technical experiments and practical problem-solving.</p></section>
+    <div className="project-grid">
+      {projects.map((p, index) => <Link key={p.id} href={`/work/${p.slug}`} className="surface project-card">
+        <div className="project-index">0{index + 1}</div><div className="project-heading"><h2>{p.name}</h2>{p.featured && <span className="tag">Featured</span>}</div>
+        <p className="muted project-description">{p.description}</p><div className="tag-row">{p.skills.map(s => <span key={s.skillId} className="tag">{s.skill.name}</span>)}</div><span className="project-link">View project <span aria-hidden="true">↗</span></span>
+      </Link>)}
+    </div>
+    {!projects.length && <div className="surface empty-state"><h2>No published projects yet</h2><p className="muted">Draft work remains private until it is explicitly published.</p></div>}
+  </main><SiteFooter /></>;
+}

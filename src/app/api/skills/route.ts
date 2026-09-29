@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const category = await db.skillCategory.findUnique({ where: { id: parsed.data.categoryId } });
   if (!category) return NextResponse.json({ error: "Skill category not found." }, { status: 400 });
 
-  const skill = await db.skill.create({ data: { userId: user.id, ...parsed.data } });
+  const skill = await db.skill.create({ data: { userId: user.id, ...parsed.data }, include: { category: true } });
   await db.activityLog.create({ data: { userId: user.id, action: "skill.created", entity: "Skill", entityId: skill.id } });
   return NextResponse.json({ skill }, { status: 201 });
 }

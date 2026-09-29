@@ -1,1 +1,43 @@
-import { db } from "@/lib/db";import { requireOwner } from "@/lib/owner";export default async function SettingsPage(){const u=await requireOwner();const settings=await db.siteSettings.findUnique({where:{userId:u.id}});return <div className="mx-auto max-w-4xl"><h1 className="text-3xl font-semibold">Settings</h1><p className="mt-2 text-slate-400">Owner-level portfolio and workspace configuration.</p><section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/50 p-6"><h2 className="font-medium">Configuration</h2><dl className="mt-5 space-y-4 text-sm"><div className="flex justify-between border-b border-slate-800 pb-3"><dt className="text-slate-500">Settings record</dt><dd>{settings?"Configured":"Not configured"}</dd></div><div className="flex justify-between border-b border-slate-800 pb-3"><dt className="text-slate-500">Public publishing</dt><dd>Explicit only</dd></div><div className="flex justify-between"><dt className="text-slate-500">Private career data</dt><dd>Owner protected</dd></div></dl></section></div>}
+import { db } from "@/lib/db";
+import { requireOwner } from "@/lib/owner";
+import { SettingsManager } from "@/components/dashboard/settings-manager";
+
+const defaults = {
+  siteTitle: "",
+  tagline: "",
+  location: "",
+  contactEmail: "",
+  githubUrl: "",
+  linkedinUrl: "",
+  publicResumePath: "",
+  analyticsEnabled: false,
+};
+
+export default async function SettingsPage() {
+  const user = await requireOwner();
+  const record = await db.siteSettings.findUnique({ where: { userId: user.id } });
+  const raw = record?.settings && typeof record.settings === "object" && !Array.isArray(record.settings)
+    ? record.settings as Record<string, unknown>
+    : {};
+
+  const settings = {
+    ...defaults,
+    siteTitle: typeof raw.siteTitle === "string" ? raw.siteTitle : defaults.siteTitle,
+    tagline: typeof raw.tagline === "string" ? raw.tagline : defaults.tagline,
+    location: typeof raw.location === "string" ? raw.location : defaults.location,
+    contactEmail: typeof raw.contactEmail === "string" ? raw.contactEmail : defaults.contactEmail,
+    githubUrl: typeof raw.githubUrl === "string" ? raw.githubUrl : defaults.githubUrl,
+    linkedinUrl: typeof raw.linkedinUrl === "string" ? raw.linkedinUrl : defaults.linkedinUrl,
+    publicResumePath: typeof raw.publicResumePath === "string" ? raw.publicResumePath : defaults.publicResumePath,
+    analyticsEnabled: raw.analyticsEnabled === true,
+  };
+
+  return (
+    <div className="mx-auto max-w-5xl">
+      <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">Workspace</p>
+      <h1 className="mt-2 text-3xl font-semibold">Settings</h1>
+      <p className="mt-2 text-slate-400">Control public portfolio metadata and privacy-aware workspace behavior.</p>
+      <SettingsManager initialSettings={settings} />
+    </div>
+  );
+}

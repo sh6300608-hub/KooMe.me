@@ -1,1 +1,24 @@
-import { db } from "@/lib/db";import { requireOwner } from "@/lib/owner";export default async function ApplicationsPage(){const u=await requireOwner();const rows=await db.application.findMany({where:{userId:u.id},include:{interviews:true},orderBy:{createdAt:"desc"}});const statuses=[...new Set(rows.map(x=>x.status))];return <div className="mx-auto max-w-7xl"><h1 className="text-3xl font-semibold">Applications</h1><p className="mt-2 text-slate-400">Your private recruiting pipeline.</p><div className="mt-8 overflow-x-auto rounded-2xl border border-slate-800"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-900 text-slate-500"><tr>{["Company","Role","Status","Applied","Interviews","Location"].map(h=><th key={h} className="px-5 py-4 font-medium">{h}</th>)}</tr></thead><tbody>{rows.map(x=><tr key={x.id} className="border-t border-slate-800"><td className="px-5 py-4 font-medium">{x.company}</td><td className="px-5 py-4 text-slate-400">{x.jobTitle}</td><td className="px-5 py-4"><span className="rounded-full border border-slate-700 px-2.5 py-1 text-xs">{x.status}</span></td><td className="px-5 py-4 text-slate-500">{x.applicationDate?.toLocaleDateString()??"—"}</td><td className="px-5 py-4 text-slate-400">{x.interviews.length}</td><td className="px-5 py-4 text-slate-500">{x.location??"—"}</td></tr>)}</tbody></table>{!rows.length&&<p className="p-10 text-center text-slate-500">No applications yet.</p>}</div>{statuses.length>0&&<p className="mt-4 text-xs text-slate-600">Active statuses: {statuses.join(" · ")}</p>}</div>}
+import { db } from "@/lib/db";
+import { requireOwner } from "@/lib/owner";
+import { ApplicationManager } from "@/components/dashboard/application-manager";
+
+export default async function ApplicationsPage() {
+  const user = await requireOwner();
+  const rows = await db.application.findMany({
+    where: { userId: user.id },
+    include: { interviews: { select: { id: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+  return (
+    <div className="mx-auto max-w-7xl">
+      <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">Workspace</p>
+      <h1 className="mt-2 text-3xl font-semibold">Applications</h1>
+      <p className="mt-2 mb-8 text-slate-400">Track applications, follow-ups, interviews, and recruiting notes in one private pipeline.</p>
+      <ApplicationManager initialApplications={rows.map((row) => ({
+        ...row,
+        applicationDate: row.applicationDate?.toISOString() ?? null,
+        followUpDate: row.followUpDate?.toISOString() ?? null,
+      }))} />
+    </div>
+  );
+}

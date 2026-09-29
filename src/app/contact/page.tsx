@@ -1,9 +1,122 @@
 "use client";
+
 import { useState } from "react";
+import { SiteNav } from "@/components/site-nav";
+import { SiteFooter } from "@/components/site-footer";
+
+type State = "idle" | "sending" | "sent" | "error";
 
 export default function ContactPage() {
-  const [state,setState]=useState<"idle"|"sending"|"sent"|"error">("idle");
-  async function submit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setState("sending");const form=e.currentTarget;const payload=Object.fromEntries(new FormData(form).entries());const r=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});setState(r.ok?"sent":"error");if(r.ok)form.reset();}
-  return <main className="min-h-screen bg-slate-950 px-5 py-20 text-slate-100"><div className="mx-auto max-w-2xl"><p className="text-sm text-blue-400">CONTACT</p><h1 className="mt-2 text-4xl font-semibold">Let’s build something useful.</h1><p className="mt-4 text-slate-400">For opportunities, collaboration or a thoughtful technical conversation.</p><form onSubmit={submit} className="mt-10 space-y-5 rounded-2xl border border-slate-800 bg-slate-900/50 p-6"><Field name="name" label="Name" required/><Field name="email" label="Email" type="email" required/><div className="grid gap-5 sm:grid-cols-2"><Field name="company" label="Company"/><Field name="role" label="Role"/></div><label className="block text-sm text-slate-300">Message<textarea name="message" required minLength={10} maxLength={5000} rows={7} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-blue-500"/></label>{state==="sent"&&<p className="text-sm text-emerald-400" role="status">Message sent successfully.</p>}{state==="error"&&<p className="text-sm text-red-400" role="alert">Something went wrong. Please try again.</p>}<button disabled={state==="sending"} className="rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-medium disabled:opacity-50">{state==="sending"?"Sending…":"Send message"}</button></form></div></main>
+  const [state, setState] = useState<State>("idle");
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setState("sending");
+
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form).entries());
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        setState("error");
+        return;
+      }
+
+      form.reset();
+      setState("sent");
+    } catch {
+      setState("error");
+    }
+  }
+
+  return (
+    <>
+      <SiteNav />
+      <main className="container page">
+        <section className="page-hero">
+          <p className="eyebrow">CONTACT</p>
+          <h1>Let&apos;s build something useful.</h1>
+          <p className="lead">
+            For opportunities, collaboration, or a thoughtful technical conversation.
+          </p>
+        </section>
+
+        <section className="section">
+          <div className="surface cta-panel">
+            <form onSubmit={submit} className="form-stack" aria-describedby="contact-status">
+              <div className="grid-2">
+                <Field name="name" label="Name" required autoComplete="name" />
+                <Field name="email" label="Email" type="email" required autoComplete="email" />
+                <Field name="company" label="Company" autoComplete="organization" />
+                <Field name="role" label="Role" autoComplete="organization-title" />
+              </div>
+
+              <label className="field">
+                <span>Message</span>
+                <textarea
+                  name="message"
+                  required
+                  minLength={10}
+                  maxLength={5000}
+                  rows={8}
+                  placeholder="Tell me what you are working on."
+                />
+              </label>
+
+              <div id="contact-status" aria-live="polite">
+                {state === "sent" && (
+                  <p className="status-success" role="status">
+                    Message sent successfully. Thanks for reaching out.
+                  </p>
+                )}
+                {state === "error" && (
+                  <p className="status-error" role="alert">
+                    Something went wrong. Please check your details and try again.
+                  </p>
+                )}
+              </div>
+
+              <div className="form-actions">
+                <button className="btn btn-primary" type="submit" disabled={state === "sending"}>
+                  {state === "sending" ? "Sending…" : "Send message"}
+                </button>
+                <span className="muted">Your message is stored securely for follow-up.</span>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  );
 }
-function Field({name,label,type="text",required=false}:{name:string;label:string;type?:string;required?:boolean}){return <label className="block text-sm text-slate-300">{label}<input name={name} type={type} required={required} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-blue-500"/></label>}
+
+function Field({
+  name,
+  label,
+  type = "text",
+  required = false,
+  autoComplete,
+}: {
+  name: string;
+  label: string;
+  type?: string;
+  required?: boolean;
+  autoComplete?: string;
+}) {
+  return (
+    <label className="field">
+      <span>
+        {label}
+        {required && <span aria-hidden="true"> *</span>}
+      </span>
+      <input name={name} type={type} required={required} autoComplete={autoComplete} />
+    </label>
+  );
+}

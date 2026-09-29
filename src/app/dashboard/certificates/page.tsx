@@ -1,1 +1,14 @@
-import { db } from "@/lib/db";import { requireOwner } from "@/lib/owner";export default async function CertificatesPage(){const u=await requireOwner();const rows=await db.certificate.findMany({where:{userId:u.id},orderBy:[{featured:"desc"},{date:"desc"}]});return <div className="mx-auto max-w-6xl"><h1 className="text-3xl font-semibold">Certificates</h1><div className="mt-8 grid gap-4 md:grid-cols-2">{rows.length?rows.map(x=><article key={x.id} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6"><h2 className="font-medium">{x.title}</h2><p className="mt-2 text-sm text-slate-400">{x.organization}{x.date?` · ${x.date.toLocaleDateString()}`:""}</p><p className="mt-3 text-xs text-slate-500">{x.credentialId??"Credential ID not added"}</p></article>):<p className="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-500">No certificates yet.</p>}</div></div>}
+import { db } from "@/lib/db";
+import { requireOwner } from "@/lib/owner";
+import { CertificateManager } from "@/components/dashboard/certificate-manager";
+
+export default async function CertificatesPage() {
+  const user = await requireOwner();
+  const rows = await db.certificate.findMany({ where: { userId: user.id }, orderBy: [{ featured: "desc" }, { date: "desc" }] });
+  return <div className="mx-auto max-w-6xl">
+    <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">Workspace</p>
+    <h1 className="mt-2 text-3xl font-semibold">Certificates</h1>
+    <p className="mt-2 mb-8 text-slate-400">Manage credentials, verification links, related skills, visibility, and featured status.</p>
+    <CertificateManager initialCertificates={rows.map(row => ({ ...row, date: row.date?.toISOString() ?? null }))} />
+  </div>;
+}

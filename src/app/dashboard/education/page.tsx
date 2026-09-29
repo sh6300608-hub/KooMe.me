@@ -1,1 +1,24 @@
-import { db } from "@/lib/db";import { requireOwner } from "@/lib/owner";export default async function EducationPage(){const u=await requireOwner();const rows=await db.education.findMany({where:{userId:u.id},orderBy:{startDate:"desc"}});return <div className="mx-auto max-w-6xl"><h1 className="text-3xl font-semibold">Education</h1><div className="mt-8 space-y-4">{rows.length?rows.map(x=><article key={x.id} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6"><h2 className="text-xl font-medium">{x.degree}</h2><p className="mt-1 text-slate-400">{x.institution}{x.board?` · ${x.board}`:""}</p><p className="mt-3 text-sm text-slate-500">{x.startDate?.getFullYear()??""}{x.endDate?` – ${x.endDate.getFullYear()}`:""}{x.score?` · ${x.score}`:""}</p></article>):<p className="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-500">No education records yet.</p>}</div></div>}
+import { db } from "@/lib/db";
+import { requireOwner } from "@/lib/owner";
+import { EducationManager } from "@/components/dashboard/education-manager";
+
+export default async function EducationPage() {
+  const user = await requireOwner();
+  const rows = await db.education.findMany({
+    where: { userId: user.id },
+    orderBy: [{ featured: "desc" }, { startDate: "desc" }],
+  });
+
+  return (
+    <div className="mx-auto max-w-6xl">
+      <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">Workspace</p>
+      <h1 className="mt-2 text-3xl font-semibold">Education</h1>
+      <p className="mt-2 mb-8 text-slate-400">Manage academic history, scores, achievements, documents, and public publishing.</p>
+      <EducationManager initialEducation={rows.map((row) => ({
+        ...row,
+        startDate: row.startDate?.toISOString() ?? null,
+        endDate: row.endDate?.toISOString() ?? null,
+      }))} />
+    </div>
+  );
+}

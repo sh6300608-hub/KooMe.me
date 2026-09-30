@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { requireOwner } from "@/lib/owner";
+import { z } from "zod";
+const input=z.object({name:z.string().trim().min(1).max(200),company:z.string().trim().max(200).optional().nullable(),role:z.string().trim().max(200).optional().nullable(),location:z.string().trim().max(200).optional().nullable(),notes:z.string().trim().max(5000).optional().nullable(),priority:z.coerce.number().int().min(0).max(5).default(0)});
+export async function PUT(request:Request,{params}:{params:Promise<{id:string}>}){try{const u=await requireOwner();const {id}=await params;const p=input.safeParse(await request.json());if(!p.success)return NextResponse.json({error:"Invalid recruiter data."},{status:400});const f=await db.recruiter.findFirst({where:{id,userId:u.id},select:{id:true}});if(!f)return NextResponse.json({error:"Recruiter not found."},{status:404});return NextResponse.json(await db.recruiter.update({where:{id},data:{...p.data,userId:u.id}}));}catch{return NextResponse.json({error:"Unable to update recruiter."},{status:500});}}
+export async function DELETE(_r:Request,{params}:{params:Promise<{id:string}>}){try{const u=await requireOwner();const {id}=await params;const f=await db.recruiter.findFirst({where:{id,userId:u.id},select:{id:true}});if(!f)return NextResponse.json({error:"Recruiter not found."},{status:404});await db.recruiter.delete({where:{id}});return NextResponse.json({ok:true});}catch{return NextResponse.json({error:"Unable to delete recruiter."},{status:500});}}

@@ -1,1 +1,12 @@
-import { db } from "@/lib/db";import { requireOwner } from "@/lib/owner";export default async function InterviewsPage(){const u=await requireOwner();const rows=await db.interview.findMany({where:{userId:u.id},orderBy:{dateTime:"asc"}});return <div className="mx-auto max-w-6xl"><h1 className="text-3xl font-semibold">Interviews</h1><div className="mt-8 space-y-4">{rows.length?rows.map(x=><article key={x.id} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6"><div className="flex flex-wrap justify-between gap-4"><div><h2 className="font-medium">{x.company} · {x.role}</h2><p className="mt-1 text-sm text-slate-500">{x.round??"Interview"}{x.type?` · ${x.type}`:""}</p></div><time className="text-sm text-blue-400">{x.dateTime.toLocaleString()}</time></div>{x.prepNotes&&<p className="mt-4 text-sm text-slate-400">Prep: {x.prepNotes}</p>}</article>):<p className="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-500">No interviews scheduled.</p>}</div></div>}
+import { db } from "@/lib/db";
+import { requireOwner } from "@/lib/owner";
+import { InterviewManager } from "@/components/dashboard/interview-manager";
+
+export default async function InterviewsPage(){
+  const user=await requireOwner();
+  const [rows,applications]=await Promise.all([
+    db.interview.findMany({where:{userId:user.id},orderBy:{dateTime:"asc"}}),
+    db.application.findMany({where:{userId:user.id},select:{id:true,company:true,jobTitle:true},orderBy:{createdAt:"desc"}})
+  ]);
+  return <div className="mx-auto max-w-7xl"><p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">Workspace</p><h1 className="mt-2 text-3xl font-semibold">Interviews</h1><p className="mt-2 mb-8 text-slate-400">Schedule interviews, connect them to applications, and keep preparation and outcomes private.</p><InterviewManager initialInterviews={rows.map(x=>({...x,dateTime:x.dateTime.toISOString(),nextRound:x.nextRound?.toISOString()||null}))} applications={applications}/></div>
+}

@@ -67,7 +67,7 @@ export default async function ResumePage({ params }: { params: Promise<{ slug: s
       <main className="container resume-page">
         <div className="resume-toolbar">
           <Link href="/" className="btn btn-secondary">Back to KooMi</Link>
-          {version?.pdfUrl && <a className="btn btn-primary" href={version.pdfUrl} target="_blank" rel="noreferrer">Download PDF</a>}
+          <a className="btn btn-primary" href={`/api/resume/${resume.slug}/pdf`} target="_blank" rel="noreferrer">Download PDF</a>
         </div>
 
         <article className="surface resume-sheet">

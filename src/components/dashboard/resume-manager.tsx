@@ -144,7 +144,7 @@ export function ResumeManager({ initialResumes }: { initialResumes: Resume[] }) 
         </div>
         <label className="grid gap-2 text-sm">Experience <span className="text-xs text-slate-500">One per line: Title | Company | Period | Description</span><textarea name="experience" rows={8} defaultValue={editor.experience} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-xs" /></label>
         {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
-        <div className="flex flex-wrap gap-2"><button disabled={busy} className="btn btn-primary" type="submit">{busy ? "Saving…" : "Save new version"}</button><button type="button" className="btn" onClick={() => setEditing(null)}>Close</button><button type="button" disabled={busy} className="btn text-red-300" onClick={() => remove(editing.id)}>Delete resume</button>{editing.status === "PUBLISHED" && <a className="btn" href={`/resume/${editing.slug}`} target="_blank" rel="noreferrer">Open public ↗</a>}</div>
+        <div className="flex flex-wrap gap-2"><button disabled={busy} className="btn btn-primary" type="submit">{busy ? "Saving…" : "Save new version"}</button><button type="button" className="btn" onClick={() => setEditing(null)}>Close</button><button type="button" disabled={busy} className="btn text-red-300" onClick={() => remove(editing.id)}>Delete resume</button>{editing.status === "PUBLISHED" && <><a className="btn" href={`/resume/${editing.slug}`} target="_blank" rel="noreferrer">Open public ↗</a><a className="btn" href={`/api/resume/${editing.slug}/pdf`} target="_blank" rel="noreferrer">PDF ↗</a></>}</div>
       </>}
     </form>
   </div>;

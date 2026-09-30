@@ -1,1 +1,17 @@
-import { db } from "@/lib/db";import { requireOwner } from "@/lib/owner";export default async function DocumentsPage(){const u=await requireOwner();const rows=await db.document.findMany({where:{userId:u.id},orderBy:{createdAt:"desc"}});return <div className="mx-auto max-w-6xl"><h1 className="text-3xl font-semibold">Documents</h1><p className="mt-2 text-slate-400">Private document index. Storage/upload endpoints are intentionally separate from public content.</p><div className="mt-8 grid gap-3">{rows.map(x=><article key={x.id} className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/50 p-5"><div><h2 className="font-medium">{x.name}</h2><p className="mt-1 text-xs text-slate-500">{x.folder??"Unsorted"} · {x.mimeType} · {x.size.toLocaleString()} bytes</p></div><time className="text-xs text-slate-600">{x.createdAt.toLocaleDateString()}</time></article>)}{!rows.length&&<p className="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-500">No private documents yet.</p>}</div></div>}
+import { db } from "@/lib/db";
+import { requireOwner } from "@/lib/owner";
+import { DocumentManager } from "@/components/dashboard/document-manager";
+
+export default async function DocumentsPage() {
+  const u = await requireOwner();
+  const rows = await db.document.findMany({ where: { userId: u.id }, orderBy: { createdAt: "desc" } });
+
+  return (
+    <div className="mx-auto max-w-6xl">
+      <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">Workspace</p>
+      <h1 className="mt-2 text-3xl font-semibold">Documents</h1>
+      <p className="mt-2 mb-8 text-slate-400">Private career documents stay behind owner authentication and are never exposed through public portfolio routes.</p>
+      <DocumentManager initialDocuments={rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }))} />
+    </div>
+  );
+}

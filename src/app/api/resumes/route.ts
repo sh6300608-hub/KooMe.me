@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import { requireOwner } from "@/lib/owner";
 
 const schema = z.object({

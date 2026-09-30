@@ -26,8 +26,7 @@ export function SecurityManager({ initialSessions }: { initialSessions: SessionI
       if (!response.ok) throw new Error("Request failed");
       if (action === "revoke") setSessions((current) => current.filter((session) => session.id !== sessionId));
       else if (action === "revoke-others") {
-        const current = sessions[0];
-        setSessions(current ? [current] : []);
+        window.location.reload();
       } else {
         setSessions([]);
         window.location.assign("/login");
